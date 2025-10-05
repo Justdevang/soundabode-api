@@ -2,12 +2,13 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
-// Middleware
+// FIXED: Allow ALL origins for now (you can restrict later)
 app.use(cors({
-  origin: ['https://soundabode.onrender.com', 'http://localhost:3000'],
+  origin: '*',  // ← THIS IS THE FIX - allows any domain
   methods: ['GET', 'POST'],
-  credentials: true
+  allowedHeaders: ['Content-Type']
 }));
+
 app.use(express.json());
 
 // Your reCAPTCHA v2 SECRET KEY
@@ -31,11 +32,14 @@ app.post('/api/verify-recaptcha', async (req, res) => {
   try {
     const { token } = req.body;
 
-    console.log('Received verification request');
+    console.log('=================================');
+    console.log('📥 Received verification request');
+    console.log('Origin:', req.headers.origin);
+    console.log('Token received:', token ? 'Yes' : 'No');
 
     // Validate token is provided
     if (!token) {
-      console.log('Error: No token provided');
+      console.log('❌ Error: No token provided');
       return res.status(400).json({ 
         success: false, 
         error: 'Token is required' 
@@ -50,7 +54,7 @@ app.post('/api/verify-recaptcha', async (req, res) => {
       response: token
     });
 
-    console.log('Verifying with Google...');
+    console.log('🔍 Verifying with Google...');
 
     const response = await fetch(verifyUrl, {
       method: 'POST',
@@ -63,7 +67,7 @@ app.post('/api/verify-recaptcha', async (req, res) => {
     const data = await response.json();
 
     // Log for debugging
-    console.log('Google reCAPTCHA response:', {
+    console.log('📋 Google reCAPTCHA response:', {
       success: data.success,
       hostname: data.hostname,
       challenge_ts: data['challenge_ts'],
@@ -72,7 +76,7 @@ app.post('/api/verify-recaptcha', async (req, res) => {
 
     // Check if verification failed
     if (!data.success) {
-      console.log('Verification failed:', data['error-codes']);
+      console.log('❌ Verification failed:', data['error-codes']);
       return res.json({ 
         success: false, 
         error: 'reCAPTCHA verification failed',
@@ -81,14 +85,17 @@ app.post('/api/verify-recaptcha', async (req, res) => {
     }
 
     // Verification successful
-    console.log('Verification successful!');
+    console.log('✅ Verification successful!');
+    console.log('=================================');
+    
     res.json({
       success: true,
       message: 'reCAPTCHA verification successful'
     });
 
   } catch (error) {
-    console.error('reCAPTCHA verification error:', error);
+    console.error('❌ reCAPTCHA verification error:', error);
+    console.log('=================================');
     res.status(500).json({ 
       success: false, 
       error: 'Internal server error during verification'
@@ -116,5 +123,6 @@ app.listen(PORT, () => {
   console.log(`📍 Port: ${PORT}`);
   console.log(`📍 Health: http://localhost:${PORT}/`);
   console.log(`📍 Verify: http://localhost:${PORT}/api/verify-recaptcha`);
+  console.log(`🌐 CORS: Enabled for ALL origins`);
   console.log('=================================');
 });
