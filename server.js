@@ -12,13 +12,13 @@ app.use(cors({
 app.use(express.json());
 
 // Your reCAPTCHA v2 SECRET KEY
-const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY || '6Lesft8rAAAAANbZ6YazsT_SuhpMwLkMreYtn7W2';
+const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY || '6Ld5K-4rAAAAAOUSOANAjuBZuxOFnGB2VWLxTj43';
 
 // Health check endpoint
 app.get('/', (req, res) => {
   res.json({ 
     status: 'OK', 
-    message: 'Sound Abode reCAPTCHA API is running',
+    message: 'Soundabode reCAPTCHA API is running',
     timestamp: new Date().toISOString(),
     endpoints: {
       health: 'GET /',
